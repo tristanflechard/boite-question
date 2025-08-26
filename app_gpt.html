@@ -74,6 +74,7 @@
   </div>
 
 <script>
+/* ===================== Données ===================== */
 const questions = [
   "On commence facile : quel est l’âge de Margaux et de Corentin ?",
   "Qui a fait le premier pas entre Margaux et Corentin selon vous ?",
@@ -91,6 +92,7 @@ const questions = [
 // Durées spécifiques en ms
 const questionDurations = [8000,8000,8000,8000,12000,15000,15000,10000,8000,8000,12000];
 
+/* ===================== Sélecteurs ===================== */
 const permissionPage=document.getElementById('permissionPage');
 const rulesPage=document.getElementById('rulesPage');
 const quizPage=document.getElementById('quizPage');
@@ -103,74 +105,144 @@ const startBtn=document.getElementById('startBtn');
 const permissionBtn=document.getElementById('permissionBtn');
 const webcamPreview=document.getElementById('webcamPreview');
 
-let stream=null,mediaRecorder,recordedChunks=[],currentQuestion=0,questionTimer;
+/* ===================== État ===================== */
+let stream=null;
+let mediaRecorder=null;
+let recordedChunks=[];
+let currentQuestion=0;
+let questionTimer=null;
+let hasDownloaded=false;
 
-permissionBtn.addEventListener('click',async()=>{
+/* ===================== Utilitaires ===================== */
+function resetForNewRun(){
+  // Remettre à zéro tout l'état du quiz avant de (re)d démarrer
+  currentQuestion = 0;
+  clearInterval(questionTimer);
+  questionTimer = null;
+  questionText.textContent = "Chargement...";
+  countdown.textContent = "⏳ --s restantes";
+  countdown.style.color = "#ffcc00";
+  progress.style.width = "0%";
+  recordedChunks = [];
+  hasDownloaded = false;
+}
+
+function goTo(page){
+  // Helper d'affichage
+  [permissionPage, rulesPage, quizPage, endPage].forEach(p=>p.classList.remove('active'));
+  page.classList.add('active');
+}
+
+/* ===================== Permissions ===================== */
+permissionBtn.addEventListener('click', async ()=>{
   try{
-    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-    webcamPreview.srcObject=stream;
-    permissionPage.classList.remove('active');
-    rulesPage.classList.add('active');
-  }catch(e){alert("Impossible d'accéder à la caméra/micro 🚫");}
+    stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    webcamPreview.srcObject = stream; // on montre l'aperçu dès maintenant
+    goTo(rulesPage);
+  }catch(e){
+    alert("Impossible d'accéder à la caméra/micro 🚫");
+  }
 });
 
-startBtn.addEventListener('click',()=>{
-  rulesPage.classList.remove('active');
-  quizPage.classList.add('active');
+/* ===================== Démarrage Quiz ===================== */
+startBtn.addEventListener('click', ()=>{
+  resetForNewRun();               // ✅ important : on nettoie tout l'état
+  goTo(quizPage);
   startRecording();
   showQuestion(0);
 });
 
+/* ===================== Enregistrement ===================== */
 function startRecording(){
-  recordedChunks=[];
-  mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9,opus'});
-  mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);}
-  mediaRecorder.start(100);
+  recordedChunks = [];
+  hasDownloaded = false;
+
+  // (re)crée un MediaRecorder propre
+  mediaRecorder = new MediaRecorder(stream, {mimeType:'video/webm;codecs=vp9,opus'});
+
+  mediaRecorder.ondataavailable = e=>{
+    if(e.data && e.data.size > 0) recordedChunks.push(e.data);
+  };
+
+  // Gère le téléchargement auto et le retour aux règles *une seule fois*
+  mediaRecorder.onstop = ()=>{
+    if (hasDownloaded) return; // garde-fou
+    hasDownloaded = true;
+
+    const blob = new Blob(recordedChunks, {type:'video/webm'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = "moumounes-quiz.webm";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Affiche "Quiz terminé" encore quelques secondes puis retour aux règles
+    setTimeout(()=>{
+      goTo(rulesPage);
+      resetForNewRun(); // prêt pour la prochaine session
+    }, 3000);
+  };
+
+  mediaRecorder.start(250);
 }
 
+/* ===================== Logique d'affichage des questions ===================== */
 function showQuestion(index){
-  if(index>=questions.length){finishQuiz();return;}
-  questionText.textContent=questions[index];
-  let duration=questionDurations[index]||10000;
-  let remaining=Math.ceil(duration/1000);
-  countdown.textContent=`⏳ ${remaining}s restantes`;
-  progress.style.width="0%";
+  if(index >= questions.length){
+    finishQuiz();
+    return;
+  }
 
-  let elapsed=0;
+  questionText.textContent = questions[index];
+
+  const duration = questionDurations[index] || 10000;
+  let remaining  = Math.ceil(duration/1000);
+  let elapsed    = 0;
+
+  countdown.textContent = `⏳ ${remaining}s restantes`;
+  countdown.style.color = "#ffcc00";
+  progress.style.width  = "0%";
+
   clearInterval(questionTimer);
-  questionTimer=setInterval(()=>{
-    elapsed+=100;
-    if(elapsed%1000===0){
+  questionTimer = setInterval(()=>{
+    elapsed += 100;
+
+    // Mise à jour numérique chaque seconde
+    if (elapsed % 1000 === 0) {
       remaining--;
-      countdown.textContent=`⏳ ${remaining}s restantes`;
-      if(remaining<=3){countdown.style.color="red";} else {countdown.style.color="#ffcc00";}
+      countdown.textContent = `⏳ ${remaining}s restantes`;
+      countdown.style.color = (remaining <= 3 ? "red" : "#ffcc00");
     }
-    progress.style.width=Math.min((elapsed/duration)*100,100)+"%";
-    if(elapsed>=duration){
+
+    // Barre de progression
+    const pct = Math.min((elapsed / duration) * 100, 100);
+    progress.style.width = pct + "%";
+
+    // Passage à la question suivante
+    if (elapsed >= duration) {
       clearInterval(questionTimer);
-      currentQuestion++;
+      currentQuestion = index + 1;     // ✅ base sur l'index courant (pas l'ancien état)
       showQuestion(currentQuestion);
     }
-  },100);
+  }, 100);
 }
 
+/* ===================== Fin de quiz ===================== */
 function finishQuiz(){
-  mediaRecorder.stop();
-  quizPage.classList.remove('active');
-  endPage.classList.add('active');
-  // Téléchargement auto + retour aux règles
-  setTimeout(()=>{
-    const blob=new Blob(recordedChunks,{type:'video/webm'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download="moumounes-quiz.webm";a.click();
-    URL.revokeObjectURL(url);
-  },500);
+  clearInterval(questionTimer);
+  questionTimer = null;
 
-  setTimeout(()=>{
-    endPage.classList.remove('active');
-    rulesPage.classList.add('active');
-  },4000); // affiche 4s la page "Quiz terminé" puis retour aux règles
+  // Bascule visuelle d'abord
+  goTo(endPage);
+
+  // Puis arrêt propre de l'enregistrement -> déclenchera onstop (téléchargement + retour règles)
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    try { mediaRecorder.stop(); } catch(e){}
+  } else {
+    // Garde-fou si jamais pas d'enregistrement
+    setTimeout(()=>{ goTo(rulesPage); resetForNewRun(); }, 3000);
+  }
 }
 </script>
 </body>
