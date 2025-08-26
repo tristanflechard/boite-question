@@ -34,7 +34,15 @@
   </style>
 </head>
 <body>
-  <div id="rulesPage" class="page active">
+  <!-- Page 1 : Autorisations -->
+  <div id="permissionPage" class="page active">
+    <h1><i class="fas fa-video"></i> Autorisations requises</h1>
+    <p>Pour participer au jeu, veuillez autoriser l'accès à la caméra et au micro.</p>
+    <button id="permissionBtn"><i class="fas fa-check-circle"></i> Autoriser caméra & micro</button>
+  </div>
+
+  <!-- Page 2 : Règles -->
+  <div id="rulesPage" class="page">
     <h1><i class="fas fa-box"></i> La Boîte aux Questions</h1>
     <h2>Bienvenue au défi des moumounes 🎉</h2>
     <p><b>Règles :</b></p>
@@ -46,10 +54,10 @@
       <li>Répondez seul ou en groupe, à vous de choisir</li>
       <li><b>Nous serons les seuls à voir la vidéo (montage ensuite possible)</b></li>
     </ul>
-    <button id="permissionBtn"><i class="fas fa-check-circle"></i> Autoriser caméra & micro</button><br>
-    <button id="startBtn" disabled><i class="fas fa-play"></i> Commencer le Quiz</button>
+    <button id="startBtn"><i class="fas fa-play"></i> Commencer le Quiz</button>
   </div>
 
+  <!-- Page 3 : Quiz -->
   <div id="quizPage" class="page">
     <div class="question-container">
       <div class="question-text" id="questionText">Chargement...</div>
@@ -59,6 +67,7 @@
     <video id="webcamPreview" autoplay muted playsinline style="margin-top:20px;width:100%;max-width:500px;border-radius:10px;transform:scaleX(-1)"></video>
   </div>
 
+  <!-- Page 4 : Fin -->
   <div id="endPage" class="page">
     <h1>🎬 Quiz terminé 🎬</h1>
     <p>Merci pour votre participation ❤️</p>
@@ -82,9 +91,11 @@ const questions = [
 // Durées spécifiques en ms
 const questionDurations = [8000,8000,8000,8000,12000,15000,15000,10000,8000,8000,12000];
 
+const permissionPage=document.getElementById('permissionPage');
 const rulesPage=document.getElementById('rulesPage');
 const quizPage=document.getElementById('quizPage');
 const endPage=document.getElementById('endPage');
+
 const questionText=document.getElementById('questionText');
 const countdown=document.getElementById('countdown');
 const progress=document.getElementById('progress');
@@ -98,8 +109,8 @@ permissionBtn.addEventListener('click',async()=>{
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
     webcamPreview.srcObject=stream;
-    startBtn.disabled=false;
-    alert("Caméra & micro autorisés ✅");
+    permissionPage.classList.remove('active');
+    rulesPage.classList.add('active');
   }catch(e){alert("Impossible d'accéder à la caméra/micro 🚫");}
 });
 
@@ -132,6 +143,7 @@ function showQuestion(index){
     if(elapsed%1000===0){
       remaining--;
       countdown.textContent=`⏳ ${remaining}s restantes`;
+      if(remaining<=3){countdown.style.color="red";} else {countdown.style.color="#ffcc00";}
     }
     progress.style.width=Math.min((elapsed/duration)*100,100)+"%";
     if(elapsed>=duration){
@@ -146,7 +158,7 @@ function finishQuiz(){
   mediaRecorder.stop();
   quizPage.classList.remove('active');
   endPage.classList.add('active');
-  // Téléchargement auto
+  // Téléchargement auto + retour aux règles
   setTimeout(()=>{
     const blob=new Blob(recordedChunks,{type:'video/webm'});
     const url=URL.createObjectURL(blob);
@@ -154,6 +166,11 @@ function finishQuiz(){
     a.href=url;a.download="moumounes-quiz.webm";a.click();
     URL.revokeObjectURL(url);
   },500);
+
+  setTimeout(()=>{
+    endPage.classList.remove('active');
+    rulesPage.classList.add('active');
+  },4000); // affiche 4s la page "Quiz terminé" puis retour aux règles
 }
 </script>
 </body>
