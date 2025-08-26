@@ -1,223 +1,159 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Boîte aux Questions</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;display:flex;justify-content:center;align-items:center;
-            padding:20px;color:white;overflow-x:hidden;
-        }
-        @keyframes gradientBG {0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
-        .container {width:100%;max-width:900px;background:rgba(0,0,0,0.7);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5);overflow:hidden;position:relative;}
-        .page {padding:40px;display:flex;flex-direction:column;align-items:center;min-height:600px;}
-        h1 {font-size:2.5rem;margin-bottom:20px;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.5);}
-        h2 {font-size:1.8rem;margin-bottom:30px;text-align:center;color:#ffcc00;}
-        button {
-            background:#ffcc00;color:#1a2a6c;border:none;padding:15px 40px;font-size:1.2rem;font-weight:bold;
-            border-radius:50px;cursor:pointer;transition:all .3s ease;margin-top:20px;box-shadow:0 4px 10px rgba(0,0,0,0.3);
-        }
-        button:hover {background:#ffdd55;transform:translateY(-3px);}
-        button:disabled {background:#666;cursor:not-allowed;opacity:.7;}
-        .recording-indicator {display:flex;align-items:center;margin-bottom:20px;background:rgba(255,0,0,0.2);padding:10px 20px;border-radius:30px;}
-        .recording-dot {width:15px;height:15px;background:red;border-radius:50%;margin-right:10px;animation:pulse 1.5s infinite;}
-        @keyframes pulse {0%{opacity:1;}50%{opacity:.3;}100%{opacity:1;}}
-        .question-container {background:rgba(255,255,255,0.1);border-radius:20px;padding:30px;margin:30px 0 20px;width:100%;min-height:180px;display:flex;align-items:center;justify-content:center;position:relative;}
-        .question-text {font-size:1.6rem;text-align:center;font-weight:bold;animation:fadeIn .5s ease-out;padding:10px;}
-        @keyframes fadeIn {from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-        .question-counter {position:absolute;top:15px;right:15px;background:rgba(0,0,0,0.5);padding:5px 15px;border-radius:20px;font-size:.9rem;}
-        .progress-bar {width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:5px;margin:20px 0;overflow:hidden;}
-        .progress {height:100%;background:linear-gradient(90deg,#ffcc00,#ff9900);border-radius:5px;width:0%;transition:width .5s ease;}
-        .webcam-container {width:100%;max-width:600px;margin:20px auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:20px;text-align:center;}
-        #webcamPreview {width:100%;max-width:500px;border-radius:10px;background:#000;transform:scaleX(-1);}
-        .controls {display:flex;justify-content:center;margin-top:20px;}
-        .end-animation {background:#ff6b6b;color:white;padding:20px 40px;font-size:1.5rem;animation:pulseBig 2s infinite;}
-        @keyframes pulseBig {0%{transform:scale(1);}50%{transform:scale(1.05);}100%{transform:scale(1);}}
-        .instructions {background:rgba(255,255,255,0.1);border-radius:15px;padding:20px;margin-top:20px;max-width:700px;}
-        .instructions li {margin-bottom:10px;text-align:left;}
-        .video-container {width:100%;max-width:600px;margin:20px auto;background:rgba(0,0,0,0.3);border-radius:10px;padding:20px;text-align:center;}
-        #recordedVideo {width:100%;max-width:500px;border-radius:10px;background:#000;}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>La Boîte aux Questions</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin:0;padding:0;display:flex;justify-content:center;align-items:center;
+      min-height:100vh;background:linear-gradient(135deg,#1a2a6c,#b21f1f,#1a2a6c);
+      background-size:400% 400%;animation:gradientBG 15s ease infinite;color:white;
+      font-family:'Segoe UI',sans-serif;text-align:center;
+    }
+    @keyframes gradientBG {
+      0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
+    }
+    .page {display:none;max-width:800px;background:rgba(0,0,0,0.7);padding:30px;border-radius:20px;}
+    .page.active {display:block;}
+    h1 {font-size:2.2rem;margin-bottom:20px;}
+    h2 {color:#ffcc00;margin-bottom:20px;}
+    ul {text-align:left;}
+    button {
+      margin-top:20px;padding:15px 40px;border:none;border-radius:50px;
+      background:#ffcc00;color:#1a2a6c;font-weight:bold;font-size:1.2rem;cursor:pointer;
+    }
+    .question-container {
+      background:rgba(255,255,255,0.1);padding:30px;border-radius:20px;margin-bottom:20px;
+    }
+    .question-text {font-size:1.4rem;font-weight:bold;margin-bottom:15px;}
+    .countdown {font-size:1.2rem;margin-top:10px;color:#ffcc00;}
+    .progress-bar {height:10px;background:rgba(255,255,255,0.2);border-radius:5px;margin-top:20px;}
+    .progress {height:100%;background:linear-gradient(90deg,#ffcc00,#ff9900);width:0%;}
+  </style>
 </head>
 <body>
-<div class="container">
-    <!-- Page d'accueil -->
-    <div id="landingPage" class="page">
-        <h1><i class="fas fa-box"></i> La Boîte aux Questions</h1>
-        <h2>Bienvenue au défi des moumounes</h2>
+  <div id="rulesPage" class="page active">
+    <h1><i class="fas fa-box"></i> La Boîte aux Questions</h1>
+    <h2>Bienvenue au défi des moumounes 🎉</h2>
+    <p><b>Règles :</b></p>
+    <ul>
+      <li>Par groupe de 1 à 5 personnes max</li>
+      <li>Répondez aux questions sur les moumounes, filmé et enregistré</li>
+      <li>Une personne lit la question à haute voix avant de répondre</li>
+      <li>Vous avez un temps défini par question avant de passer automatiquement à la suivante</li>
+      <li>Répondez seul ou en groupe, à vous de choisir</li>
+      <li><b>Nous serons les seuls à voir la vidéo (montage ensuite possible)</b></li>
+    </ul>
+    <button id="permissionBtn"><i class="fas fa-check-circle"></i> Autoriser caméra & micro</button><br>
+    <button id="startBtn" disabled><i class="fas fa-play"></i> Commencer le Quiz</button>
+  </div>
 
-        <div class="permission-section">
-            <p>Pour participer au jeu, nous avons besoin d'accéder à votre caméra et micro.</p>
-            <button id="permissionBtn"><i class="fas fa-check-circle"></i> Autoriser caméra & micro</button>
-        </div>
-
-        <button id="startBtn" disabled>
-            <i class="fas fa-play"></i> Lancer le Jeu
-        </button>
-
-        <div class="instructions">
-            <p><i class="fas fa-info-circle"></i> Règles :</p>
-            <ul>
-                <li>Par groupe de 1 à 5 personnes max</li>
-                <li>Répondez aux questions sur les moumounes, filmé et enregistré</li>
-                <li>Une personne lit la question à haute voix avant de répondre</li>
-                <li>Vous avez un temps défini par question avant de passer automatiquement à la suivante</li>
-                <li>Répondez seul ou en groupe, à vous de choisir !</li>
-                <li><b>Nous serons les seuls à voir la vidéo (montage ensuite possible)</b></li>
-            </ul>
-        </div>
+  <div id="quizPage" class="page">
+    <div class="question-container">
+      <div class="question-text" id="questionText">Chargement...</div>
+      <div class="countdown" id="countdown">⏳ --s restantes</div>
     </div>
+    <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    <video id="webcamPreview" autoplay muted playsinline style="margin-top:20px;width:100%;max-width:500px;border-radius:10px;transform:scaleX(-1)"></video>
+  </div>
 
-    <!-- Page de quiz -->
-    <div id="recordingPage" class="page hidden">
-        <div class="recording-indicator">
-            <div class="recording-dot"></div><span>Enregistrement en cours...</span>
-        </div>
-
-        <div class="question-container">
-            <div class="question-counter">Question <span id="currentQuestion">1</span>/<span id="totalQuestions">1</span></div>
-            <div class="question-text" id="questionText">Chargement des questions...</div>
-        </div>
-
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
-        </div>
-
-        <div class="webcam-container">
-            <video id="webcamPreview" autoplay muted playsinline></video>
-        </div>
-
-        <div class="controls">
-            <button id="endBtn" class="hidden end-animation"><i class="fas fa-stop"></i> Terminer</button>
-        </div>
-    </div>
-
-    <!-- Page de fin -->
-    <div id="endPage" class="page hidden">
-        <h1><i class="fas fa-trophy"></i> Jeu Terminé!</h1>
-        <h2>Merci pour vos réponses ❤️</h2>
-        <div class="video-container">
-            <h3><i class="fas fa-film"></i> Votre enregistrement</h3>
-            <video id="recordedVideo" controls></video>
-        </div>
-        <button id="downloadBtn"><i class="fas fa-download"></i> Télécharger la Vidéo</button>
-        <button id="restartBtn"><i class="fas fa-redo"></i> Rejouer</button>
-    </div>
-</div>
+  <div id="endPage" class="page">
+    <h1>🎬 Quiz terminé 🎬</h1>
+    <p>Merci pour votre participation ❤️</p>
+  </div>
 
 <script>
 const questions = [
-    "On commence facile : quel est l’âge de Margaux et de Corentin ?",
-    "Qui a fait le premier pas entre Margaux et Corentin selon vous ?",
-    "Match de Bière pong Corentin VS Margaux, qui gagne ?",
-    "Qui fait le mieux la cuisine ?",
-    "Y’a t-il un plus beau couple que les moumounes dans ce mariage ? (Si oui nommez le ! Une seule réponse accordée)",
-    "Donnez une musique qui vous rappelle un souvenir avec les moumounes (et le contexte)",
-    "Racontez une anecdote drôle sur Corentin ou Margaux (ou les deux !)",
-    "En combien de temps les moumounes ont monté le col du Tourmalet ?",
-    "Pensez-vous que les moumounes peuvent lancer leur chaîne YouTube ?",
-    "Pensez-vous voir apparaître Spider Bar ce soir ?",
-    "Bonus : Qui porte la culotte ? (justifiez votre réponse... ou pas 😆)"
+  "On commence facile : quel est l’âge de Margaux et de Corentin ?",
+  "Qui a fait le premier pas entre Margaux et Corentin selon vous ?",
+  "Match de Bière pong Corentin VS Margaux, qui gagne ?",
+  "Qui fait le mieux la cuisine ?",
+  "Y’a t-il un plus beau couple que les moumounes dans ce mariage ? (Si oui nommez le ! Une seule réponse accordée)",
+  "Donnez une musique qui vous rappelle un souvenir avec les moumounes (et le contexte)",
+  "Racontez une anecdote drôle sur Corentin ou Margaux (ou les deux !)",
+  "En combien de temps les moumounes ont monté le col du Tourmalet ?",
+  "Pensez-vous que les moumounes peuvent lancer leur chaîne YouTube ?",
+  "Pensez-vous voir apparaître Spider Bar ce soir ?",
+  "Bonus : Qui porte la culotte ? (justifiez votre réponse... ou pas 😆)"
 ];
 
-// Durée spécifique (ms) pour chaque question
-const questionDurations = [
-    8000,  // Q1 : 8s
-    8000,  // Q2
-    8000,  // Q3
-    8000,  // Q4
-    12000, // Q5
-    15000, // Q6
-    15000, // Q7
-    10000, // Q8
-    8000,  // Q9
-    8000,  // Q10
-    12000  // Bonus
-];
+// Durées spécifiques en ms
+const questionDurations = [8000,8000,8000,8000,12000,15000,15000,10000,8000,8000,12000];
 
-const landingPage=document.getElementById('landingPage');
-const recordingPage=document.getElementById('recordingPage');
+const rulesPage=document.getElementById('rulesPage');
+const quizPage=document.getElementById('quizPage');
 const endPage=document.getElementById('endPage');
-const startBtn=document.getElementById('startBtn');
-const endBtn=document.getElementById('endBtn');
-const downloadBtn=document.getElementById('downloadBtn');
-const restartBtn=document.getElementById('restartBtn');
 const questionText=document.getElementById('questionText');
-const currentQuestionEl=document.getElementById('currentQuestion');
-const totalQuestionsEl=document.getElementById('totalQuestions');
-const progressBar=document.getElementById('progressBar');
-const recordedVideo=document.getElementById('recordedVideo');
-const webcamPreview=document.getElementById('webcamPreview');
+const countdown=document.getElementById('countdown');
+const progress=document.getElementById('progress');
+const startBtn=document.getElementById('startBtn');
 const permissionBtn=document.getElementById('permissionBtn');
+const webcamPreview=document.getElementById('webcamPreview');
 
-let currentQuestionIndex=0, mediaRecorder, recordedChunks=[], stream=null, questionTimer=null;
-totalQuestionsEl.textContent=questions.length;
+let stream=null,mediaRecorder,recordedChunks=[],currentQuestion=0,questionTimer;
 
-// Permissions caméra/micro
 permissionBtn.addEventListener('click',async()=>{
-    try{
-        stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-        startBtn.disabled=false;
-        alert("Accès accordé ✅");
-    }catch(err){alert("Erreur : accès refusé 🚫");}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    webcamPreview.srcObject=stream;
+    startBtn.disabled=false;
+    alert("Caméra & micro autorisés ✅");
+  }catch(e){alert("Impossible d'accéder à la caméra/micro 🚫");}
 });
 
-startBtn.addEventListener('click',startQuiz);
-endBtn.addEventListener('click',finishQuiz);
-downloadBtn.addEventListener('click',downloadVideo);
-restartBtn.addEventListener('click',()=>window.location.reload());
+startBtn.addEventListener('click',()=>{
+  rulesPage.classList.remove('active');
+  quizPage.classList.add('active');
+  startRecording();
+  showQuestion(0);
+});
 
-async function startQuiz(){
-    landingPage.classList.add('hidden');
-    recordingPage.classList.remove('hidden');
-    webcamPreview.srcObject=stream;
-    recordedChunks=[];
-    mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9,opus'});
-    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
-    mediaRecorder.start(100);
-    showQuestion(currentQuestionIndex);
+function startRecording(){
+  recordedChunks=[];
+  mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9,opus'});
+  mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);}
+  mediaRecorder.start(100);
 }
 
 function showQuestion(index){
-    if(index<questions.length){
-        questionText.textContent=questions[index];
-        currentQuestionEl.textContent=index+1;
-        progressBar.style.width=`${((index+1)/questions.length)*100}%`;
-        clearTimeout(questionTimer);
-        if(index<questions.length-1){
-            questionTimer=setTimeout(()=>{
-                currentQuestionIndex++;
-                showQuestion(currentQuestionIndex);
-            },questionDurations[index]||10000);
-        }else{
-            endBtn.classList.remove('hidden');
-        }
+  if(index>=questions.length){finishQuiz();return;}
+  questionText.textContent=questions[index];
+  let duration=questionDurations[index]||10000;
+  let remaining=Math.ceil(duration/1000);
+  countdown.textContent=`⏳ ${remaining}s restantes`;
+  progress.style.width="0%";
+
+  let elapsed=0;
+  clearInterval(questionTimer);
+  questionTimer=setInterval(()=>{
+    elapsed+=100;
+    if(elapsed%1000===0){
+      remaining--;
+      countdown.textContent=`⏳ ${remaining}s restantes`;
     }
+    progress.style.width=Math.min((elapsed/duration)*100,100)+"%";
+    if(elapsed>=duration){
+      clearInterval(questionTimer);
+      currentQuestion++;
+      showQuestion(currentQuestion);
+    }
+  },100);
 }
 
 function finishQuiz(){
-    if(mediaRecorder&&mediaRecorder.state!=="inactive")mediaRecorder.stop();
-    recordingPage.classList.add('hidden');
-    endPage.classList.remove('hidden');
-    setTimeout(()=>{
-        const blob=new Blob(recordedChunks,{type:'video/webm'});
-        recordedVideo.src=URL.createObjectURL(blob);
-    },500);
-}
-
-function downloadVideo(){
-    if(recordedChunks.length===0){alert("Aucune vidéo");return;}
+  mediaRecorder.stop();
+  quizPage.classList.remove('active');
+  endPage.classList.add('active');
+  // Téléchargement auto
+  setTimeout(()=>{
     const blob=new Blob(recordedChunks,{type:'video/webm'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;a.download="moumounes-quiz.webm";a.click();
     URL.revokeObjectURL(url);
+  },500);
 }
 </script>
 </body>
