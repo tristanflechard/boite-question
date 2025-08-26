@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz d'Équipe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .page {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 600px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ffcc00;
+        }
+        
+        .input-group {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            text-align: center;
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        button {
+            background: #ffcc00;
+            color: #1a2a6c;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            background: #ffdd55;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+        
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+        
+        .recording-dot {
+            width: 15px;
+            height: 15px;
+            background: red;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .question-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0 20px;
+            width: 100%;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .question-text {
+            font-size: 1.8rem;
+            text-align: center;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease-out;
+            padding: 20px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question-counter {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .webcam-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #webcamPreview {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            background: #000;
+            transform: scaleX(-1); /* Miroir pour un effet naturel */
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .end-animation {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            animation: pulseBig 2s infinite;
+        }
+        
+        @keyframes pulseBig {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .download-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffcc00;
+            border-radius: 50%;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .team-name-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 204, 0, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #recordedVideo {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            background: #000;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            max-width: 500px;
+        }
+        
+        .instructions ul {
+            margin-top: 15px;
+            padding-left: 25px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        
+        .permission-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .permission-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .permission-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        
+        .status-icon {
+            font-size: 24px;
+        }
+        
+        .status-granted {
+            color: #4caf50;
+        }
+        
+        .status-denied {
+            color: #f44336;
+        }
+        
+        .status-pending {
+            color: #ffcc00;
+        }
+        
+        .webcam-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .permission-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .permission-btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            background: #4a6fc5;
+        }
+        
+        .permission-btn:hover {
+            background: #5a7fd5;
+        }
+        
+        .permission-btn.denied {
+            background: #f44336;
+        }
+        
+        .permission-btn.denied:hover {
+            background: #ff6659;
+        }
+        
+        @media (max-width: 768px) {
+            .page {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .question-text {
+                font-size: 1.5rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .permission-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page d'accueil -->
+        <div id="landingPage" class="page">
+            <h1><i class="fas fa-users"></i> Quiz d'Équipe</h1>
+            <h2>Bienvenue au défi des questions</h2>
+            
+            <div class="input-group">
+                <label for="teamName"><i class="fas fa-flag"></i> Nom de votre équipe :</label>
+                <input type="text" id="teamName" placeholder="Entrez le nom de votre équipe">
+            </div>
+            
+            <div class="permission-section">
+                <div class="permission-box">
+                    <h3><i class="fas fa-camera"></i> Autorisations requises</h3>
+                    <p>Pour participer au quiz, nous avons besoin d'accéder à votre caméra et microphone.</p>
+                    
+                    <div class="permission-status">
+                        <div>
+                            <i class="fas fa-microphone status-icon status-pending"></i>
+                            <span>Microphone</span>
+                        </div>
+                        <div style="margin-left: 20px;">
+                            <i class="fas fa-video status-icon status-pending"></i>
+                            <span>Caméra</span>
+                        </div>
+                    </div>
+                    
+                    <div class="webcam-preview">
+                        <video id="previewVideo" autoplay muted playsinline style="width: 100%; height: 100%; transform: scaleX(-1); display: none;"></video>
+                        <p id="previewText" style="color: rgba(255,255,255,0.7);"><i class="fas fa-camera"></i> Aperçu de la caméra</p>
+                    </div>
+                    
+                    <div class="permission-buttons">
+                        <button id="permissionBtn" class="permission-btn">
+                            <i class="fas fa-check-circle"></i> Autoriser l'accès
+                        </button>
+                        <button id="denyPermissionBtn" class="permission-btn denied">
+                            <i class="fas fa-times-circle"></i> Refuser l'accès
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="startBtn" disabled>
+                <i class="fas fa-play"></i> Commencer le Quiz
+            </button>
+            
+            <div class="instructions">
+                <p><i class="fas fa-info-circle"></i> Instructions :</p>
+                <ul>
+                    <li>Entrez le nom de votre équipe</li>
+                    <li>Autorisez l'accès à votre caméra et microphone</li>
+                    <li>Cliquez sur "Commencer le Quiz"</li>
+                    <li>Votre webcam sera affichée sous les questions</li>
+                    <li>Répondez aux questions à tour de rôle</li>
+                    <li>Cliquez sur "Question Suivante" après chaque réponse</li>
+                    <li>À la dernière question, cliquez sur "Terminer le Quiz"</li>
+                    <li>Téléchargez votre vidéo finale</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Page d'enregistrement -->
+        <div id="recordingPage" class="page hidden">
+            <div class="team-name-display" id="teamNameDisplay"><i class="fas fa-users"></i> Équipe: </div>
+            
+            <div class="recording-indicator">
+                <div class="recording-dot"></div>
+                <span>Enregistrement en cours...</span>
+            </div>
+            
+            <h1><i class="fas fa-question-circle"></i> Question de Quiz</h1>
+            
+            <div class="question-container">
+                <div class="question-counter">Question <span id="currentQuestion">1</span>/<span id="totalQuestions">5</span></div>
+                <div class="question-text" id="questionText">Chargement des questions...</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div class="webcam-container">
+                <h3><i class="fas fa-video"></i> Votre enregistrement</h3>
+                <video id="webcamPreview" autoplay muted playsinline></video>
+            </div>
+            
+            <div class="controls">
+                <button id="nextBtn"><i class="fas fa-arrow-right"></i> Question Suivante</button>
+                <button id="endBtn" class="hidden end-animation"><i class="fas fa-stop"></i> Terminer le Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Page de fin -->
+        <div id="endPage" class="page hidden">
+            <h1><i class="fas fa-trophy"></i> Quiz Terminé!</h1>
+            <h2>Félicitations <span id="congratsTeam"></span> !</h2>
+            
+            <div class="video-container">
+                <h3><i class="fas fa-film"></i> Votre enregistrement vidéo</h3>
+                <video id="recordedVideo" controls></video>
+            </div>
+            
+            <div class="download-section">
+                <p>Votre vidéo est prête à être téléchargée</p>
+                <button id="downloadBtn"><i class="fas fa-download"></i> Télécharger la Vidéo</button>
+                <button id="restartBtn"><i class="fas fa-redo"></i> Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données de l'application
+        const questions = [
+            "Quelle est la capitale de la France?",
+            "Combien de planètes composent notre système solaire?",
+            "Qui a écrit 'Les Misérables'?",
+            "Quelle est la plus grande forêt tropicale du monde?",
+            "Quel est l'océan le plus profond du monde?"
+        ];
+        
+        // Éléments DOM
+        const landingPage = document.getElementById('landingPage');
+        const recordingPage = document.getElementById('recordingPage');
+        const endPage = document.getElementById('endPage');
+        const teamNameInput = document.getElementById('teamName');
+        const startBtn = document.getElementById('startBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const endBtn = document.getElementById('endBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const questionText = document.getElementById('questionText');
+        const currentQuestionEl = document.getElementById('currentQuestion');
+        const totalQuestionsEl = document.getElementById('totalQuestions');
+        const progressBar = document.getElementById('progressBar');
+        const teamNameDisplay = document.getElementById('teamNameDisplay');
+        const congratsTeam = document.getElementById('congratsTeam');
+        const recordedVideo = document.getElementById('recordedVideo');
+        const webcamPreview = document.getElementById('webcamPreview');
+        
+        // Éléments de permission
+        const permissionBtn = document.getElementById('permissionBtn');
+        const denyPermissionBtn = document.getElementById('denyPermissionBtn');
+        const previewVideo = document.getElementById('previewVideo');
+        const previewText = document.getElementById('previewText');
+        const micIcon = document.querySelector('.fa-microphone');
+        const camIcon = document.querySelector('.fa-video');
+        
+        // Variables d'état
+        let currentQuestionIndex = 0;
+        let teamName = '';
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream = null;
+        let permissionsGranted = {
+            audio: false,
+            video: false
+        };
+        
+        // Initialisation
+        totalQuestionsEl.textContent = questions.length;
+        
+        // Événements
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', showNextQuestion);
+        endBtn.addEventListener('click', finishQuiz);
+        downloadBtn.addEventListener('click', downloadVideo);
+        restartBtn.addEventListener('click', restartApp);
+        permissionBtn.addEventListener('click', requestPermissions);
+        denyPermissionBtn.addEventListener('click', denyPermissions);
+        teamNameInput.addEventListener('input', updateStartButtonState);
+        
+        // Fonctions de permission
+        async function requestPermissions() {
+            try {
+                // Demander l'accès à la caméra et au microphone
+                const newStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                // Arrêter tout flux précédent
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                stream = newStream;
+                
+                // Afficher l'aperçu sur la landing page
+                previewVideo.srcObject = stream;
+                previewVideo.style.display = 'block';
+                previewText.style.display = 'none';
+                
+                // Mettre à jour l'état des permissions
+                permissionsGranted.audio = true;
+                permissionsGranted.video = true;
+                
+                // Mettre à jour les icônes
+                micIcon.classList.remove('status-pending');
+                micIcon.classList.add('status-granted');
+                
+                camIcon.classList.remove('status-pending');
+                camIcon.classList.add('status-granted');
+                
+                // Mettre à jour le bouton de démarrage
+                updateStartButtonState();
+                
+                // Afficher un message de succès
+                showPermissionAlert('success', 'Permissions accordées avec succès!');
+                
+            } catch (err) {
+                console.error("Erreur d'accès aux médias:", err);
+                
+                // Mettre à jour l'état des permissions
+                permissionsGranted.audio = false;
+                permissionsGranted.video = false;
+                
+                // Mettre à jour les icônes
+                micIcon.classList.remove('status-pending');
+                micIcon.classList.add('status-denied');
+                
+                camIcon.classList.remove('status-pending');
+                camIcon.classList.add('status-denied');
+                
+                // Afficher un message d'erreur
+                showPermissionAlert('error', 'Erreur: Impossible d\'accéder à la caméra et au microphone.');
+            }
+        }
+        
+        function denyPermissions() {
+            // Mettre à jour l'état des permissions
+            permissionsGranted.audio = false;
+            permissionsGranted.video = false;
+            
+            // Mettre à jour les icônes
+            micIcon.classList.remove('status-pending');
+            micIcon.classList.add('status-denied');
+            
+            camIcon.classList.remove('status-pending');
+            camIcon.classList.add('status-denied');
+            
+            // Afficher un message
+            showPermissionAlert('warning', 'Vous avez refusé l\'accès à la caméra et au microphone. Le quiz ne pourra pas être enregistré.');
+            
+            // Mettre à jour le bouton de démarrage
+            updateStartButtonState();
+        }
+        
+        function showPermissionAlert(type, message) {
+            // Créer un élément d'alerte
+            const alertDiv = document.createElement('div');
+            alertDiv.textContent = message;
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                border-radius: 10px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                animation: fadeInOut 3s ease forwards;
+            `;
+            
+            if (type === 'success') {
+                alertDiv.style.backgroundColor = '#4CAF50';
+            } else if (type === 'error') {
+                alertDiv.style.backgroundColor = '#F44336';
+            } else {
+                alertDiv.style.backgroundColor = '#FF9800';
+            }
+            
+            document.body.appendChild(alertDiv);
+            
+            // Supprimer après 3 secondes
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+        
+        function updateStartButtonState() {
+            const teamNameValid = teamNameInput.value.trim() !== '';
+            const permissionsValid = permissionsGranted.audio && permissionsGranted.video;
+            
+            startBtn.disabled = !(teamNameValid && permissionsValid);
+            
+            if (startBtn.disabled) {
+                startBtn.title = !teamNameValid ? 
+                    "Veuillez entrer un nom d'équipe" : 
+                    "Veuillez autoriser l'accès à la caméra et au microphone";
+            } else {
+                startBtn.title = "Cliquez pour commencer le quiz";
+            }
+        }
+        
+        // Fonctions principales
+        async function startQuiz() {
+            teamName = teamNameInput.value.trim();
+            
+            if (!teamName) {
+                alert('Veuillez entrer un nom d\'équipe');
+                return;
+            }
+            
+            // Mise à jour de l'affichage
+            teamNameDisplay.textContent = `Équipe: ${teamName}`;
+            landingPage.classList.add('hidden');
+            recordingPage.classList.remove('hidden');
+            
+            // Démarrer l'enregistrement
+            try {
+                await startRecording();
+            } catch (error) {
+                console.error("Erreur d'enregistrement:", error);
+                alert("Erreur lors du démarrage de l'enregistrement. Veuillez vérifier vos permissions caméra/microphone.");
+                return;
+            }
+            
+            // Afficher la première question
+            showQuestion(currentQuestionIndex);
+        }
+        
+        async function startRecording() {
+            try {
+                // Utiliser le flux déjà obtenu pour l'enregistrement
+                if (!stream) {
+                    throw new Error('Aucun flux média disponible');
+                }
+                
+                // Afficher le flux dans l'élément vidéo
+                webcamPreview.srcObject = stream;
+                
+                // Initialiser l'enregistrement
+                recordedChunks = [];
+                const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.start(100); // Collecter des données toutes les 100ms
+            } catch (err) {
+                console.error("Erreur d'accès aux médias:", err);
+                throw err;
+            }
+        }
+        
+        function showQuestion(index) {
+            if (index < questions.length) {
+                questionText.textContent = questions[index];
+                currentQuestionEl.textContent = index + 1;
+                
+                // Mettre à jour la barre de progression
+                const progressPercent = ((index + 1) / questions.length) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                // Animation de la question
+                questionText.style.animation = 'none';
+                setTimeout(() => {
+                    questionText.style.animation = 'fadeIn 0.5s ease-out';
+                }, 10);
+                
+                // Afficher le bouton de fin si dernière question
+                if (index === questions.length - 1) {
+                    nextBtn.classList.add('hidden');
+                    endBtn.classList.remove('hidden');
+                }
+            }
+        }
+        
+        function showNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion(currentQuestionIndex);
+            }
+        }
+        
+        function finishQuiz() {
+            // Arrêter l'enregistrement
+            stopRecording();
+            
+            // Transition vers la page de fin
+            recordingPage.classList.add('hidden');
+            endPage.classList.remove('hidden');
+            congratsTeam.textContent = teamName;
+            
+            // Créer des confettis
+            createConfetti();
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            if (stream) {
+                // Ne pas arrêter le flux ici car nous l'utilisons pour la prévisualisation
+            }
+            
+            // Créer la vidéo à partir des chunks enregistrés
+            setTimeout(() => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoUrl = URL.createObjectURL(blob);
+                recordedVideo.src = videoUrl;
+            }, 500);
+        }
+        
+        function downloadVideo() {
+            if (recordedChunks.length === 0) {
+                alert("Aucune vidéo à télécharger");
+                return;
+            }
+            
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `quiz-${teamName}-${new Date().toISOString().slice(0, 10)}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+        
+        function restartApp() {
+            // Réinitialiser l'état
+            currentQuestionIndex = 0;
+            teamName = '';
+            recordedChunks = [];
+            
+            // Réinitialiser les éléments
+            teamNameInput.value = '';
+            recordedVideo.src = '';
+            progressBar.style.width = '0%';
+            
+            // Arrêter tous les flux
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            // Réinitialiser les permissions
+            permissionsGranted.audio = false;
+            permissionsGranted.video = false;
+            micIcon.classList.remove('status-granted', 'status-denied');
+            micIcon.classList.add('status-pending');
+            camIcon.classList.remove('status-granted', 'status-denied');
+            camIcon.classList.add('status-pending');
+            previewVideo.srcObject = null;
+            previewVideo.style.display = 'none';
+            previewText.style.display = 'block';
+            
+            // Cacher toutes les pages et afficher la page d'accueil
+            landingPage.classList.remove('hidden');
+            recordingPage.classList.add('hidden');
+            endPage.classList.add('hidden');
+            
+            // Réinitialiser les boutons
+            nextBtn.classList.remove('hidden');
+            endBtn.classList.add('hidden');
+            startBtn.disabled = true;
+        }
+        
+        function createConfetti() {
+            const container = document.querySelector('.container');
+            const colors = ['#ffcc00', '#ff6b6b', '#4ecdc4', '#1a2a6c', '#b21f1f'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = confetti.style.width;
+                confetti.style.opacity = Math.random();
+                
+                container.appendChild(confetti);
+                
+                // Supprimer après l'animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Détection de la compatibilité MediaRecorder
+        window.onload = function() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !MediaRecorder) {
+                const alertBox = document.createElement('div');
+                alertBox.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#d32f2f; color:white; padding:15px; text-align:center; z-index:1000;';
+                alertBox.textContent = "Attention: Votre navigateur ne supporte pas toutes les fonctionnalités nécessaires. Essayez avec Chrome ou Firefox.";
+                document.body.prepend(alertBox);
+            }
+        };
+    </script>
+</body>
+</html>

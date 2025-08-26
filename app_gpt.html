@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Quiz en direct</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #f0f0f0;
+    text-align: center;
+    padding: 20px;
+  }
+  #landing, #quiz, #endScreen {
+    display: none;
+  }
+  video {
+    margin-top: 20px;
+    max-width: 600px;
+    border: 2px solid #555;
+    border-radius: 12px;
+  }
+  .question {
+    font-size: 2em;
+    margin: 20px 0;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.6s ease;
+  }
+  .question.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <h1>Bienvenue au quiz !</h1>
+  <label>Nom de l'équipe : <input type="text" id="teamName"></label>
+  <br><br>
+  <button id="startButton">Commencer</button>
+</div>
+
+<div id="quiz">
+  <h2 id="questionContainer" class="question"></h2>
+  <video id="livePreview" autoplay playsinline></video>
+  <br>
+  <button id="nextButton">Question suivante</button>
+</div>
+
+<div id="endScreen">
+  <h2>Félicitations ! Les questions sont terminées.</h2>
+  <button id="downloadButton">Télécharger la vidéo</button>
+  <br><br>
+  <video id="finalVideo" controls></video>
+</div>
+
+<script>
+// ----------------- QUESTIONS -----------------
+const questions = [
+  "Quelle est la capitale de la France ?",
+  "Combien font 2 + 2 ?",
+  "Quel est le plus grand océan du monde ?",
+  "Qui a écrit 'Le Petit Prince' ?",
+  "Quelle est la couleur du cheval blanc d'Henri IV ?"
+];
+// --------------------------------------------
+
+let currentQuestion = 0;
+let mediaRecorder;
+let recordedChunks = [];
+let stream;
+
+// Afficher une question avec animation
+function showQuestion(index) {
+  const container = document.getElementById('questionContainer');
+  container.classList.remove('show');
+  setTimeout(() => {
+    container.textContent = questions[index];
+    container.classList.add('show');
+  }, 300);
+}
+
+// Démarrer enregistrement webcam + micro
+async function startRecording() {
+  stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+
+  // Affichage en live
+  const livePreview = document.getElementById("livePreview");
+  livePreview.srcObject = stream;
+
+  // Enregistrement
+  mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm; codecs=vp9" });
+  mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+  mediaRecorder.start();
+}
+
+// ----------------- EVENTS -----------------
+
+// Page d’accueil
+document.getElementById('landing').style.display = 'block';
+
+// Bouton commencer
+document.getElementById('startButton').addEventListener('click', async () => {
+  const team = document.getElementById('teamName').value;
+  if(!team) {
+    alert("Veuillez entrer le nom de l'équipe !");
+    return;
+  }
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  await startRecording();
+  showQuestion(currentQuestion);
+});
+
+// Bouton question suivante
+document.getElementById('nextButton').addEventListener('click', () => {
+  currentQuestion++;
+  if(currentQuestion >= questions.length) {
+    // Fin du quiz
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('endScreen').style.display = 'block';
+    mediaRecorder.stop();
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      document.getElementById("finalVideo").src = url;
+      document.getElementById("downloadButton").onclick = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'quiz_video.webm';
+        a.click();
+      };
+    };
+    return;
+  }
+  showQuestion(currentQuestion);
+});
+</script>
+
+</body>
+</html>

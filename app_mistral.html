@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionnaire Enregistré</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        #landingPage, #questionPage {
+            display: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #questionDisplay {
+            font-size: 24px;
+            margin: 20px;
+            transition: opacity 1s;
+            opacity: 0;
+        }
+        #videoContainer {
+            margin-top: 20px;
+        }
+        #videoElement {
+            width: 320px;
+            height: 240px;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="landingPage">
+            <h1>Bienvenue au Questionnaire</h1>
+            <p>Veuillez entrer le nom de votre équipe :</p>
+            <input type="text" id="teamName" placeholder="Nom de l'équipe">
+            <button id="startButton">Commencer</button>
+        </div>
+        <div id="questionPage">
+            <h1 id="questionDisplay"></h1>
+            <div id="videoContainer">
+                <video id="videoElement" autoplay muted></video>
+            </div>
+            <button id="nextButton">Question Suivante</button>
+            <button id="endButton" style="display:none;">Terminer</button>
+        </div>
+    </div>
+
+    <script>
+        // Liste des questions hardcodées
+        let questions = [
+            "Quelle est la capitale de la France?",
+            "Combien font 2 + 2?",
+            "Qui a peint la Joconde?",
+            "Quelle est la plus grande planète du système solaire?",
+            "Quel est le plus long fleuve du monde?"
+        ];
+
+        let currentQuestionIndex = 0;
+        let mediaRecorder;
+        let videoChunks = [];
+        let videoStream;
+
+        // Fonction pour afficher les questions avec une animation
+        function fadeInQuestion() {
+            let questionDisplay = document.getElementById('questionDisplay');
+            questionDisplay.style.opacity = 0;
+            setTimeout(() => {
+                questionDisplay.style.opacity = 1;
+            }, 100);
+        }
+
+        // Fonction pour démarrer la webcam et commencer l'enregistrement
+        async function startWebcamAndRecording() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = videoStream;
+
+                mediaRecorder = new MediaRecorder(videoStream);
+
+                mediaRecorder.ondataavailable = event => {
+                    videoChunks.push(event.data);
+                };
+
+                mediaRecorder.start();
+            } catch (error) {
+                console.error("Erreur lors de l'accès à la webcam ou au microphone:", error);
+            }
+        }
+
+        // Fonction pour arrêter l'enregistrement et exporter la vidéo
+        function stopRecordingAndExport() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.onstop = () => {
+                    const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+                    const videoUrl = URL.createObjectURL(videoBlob);
+                    const a = document.createElement('a');
+                    document.body.appendChild(a);
+                    a.style = 'display: none';
+                    a.href = videoUrl;
+                    a.download = 'enregistrement.webm';
+                    a.click();
+                    window.URL.revokeObjectURL(videoUrl);
+
+                    // Arrêter le flux vidéo
+                    if (videoStream) {
+                        videoStream.getTracks().forEach(track => track.stop());
+                    }
+                };
+            }
+        }
+
+        // Gestionnaire d'événements
+        document.getElementById('startButton').addEventListener('click', function() {
+            let teamName = document.getElementById('teamName').value;
+            if (teamName) {
+                alert(`Équipe: ${teamName}, bonne chance!`);
+                document.getElementById('landingPage').style.display = 'none';
+                document.getElementById('questionPage').style.display = 'block';
+                document.getElementById('questionDisplay').textContent = questions[currentQuestionIndex];
+                fadeInQuestion();
+                startWebcamAndRecording();
+            } else {
+                alert('Veuillez entrer un nom d\'équipe.');
+            }
+        });
+
+        // Bouton pour passer à la question suivante
+        document.getElementById('nextButton').addEventListener('click', function() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                document.getElementById('questionDisplay').textContent = questions[currentQuestionIndex];
+                fadeInQuestion();
+                if (currentQuestionIndex === questions.length - 1) {
+                    document.getElementById('nextButton').style.display = 'none';
+                    document.getElementById('endButton').style.display = 'block';
+                }
+            }
+        });
+
+        // Bouton de fin
+        document.getElementById('endButton').addEventListener('click', function() {
+            document.getElementById('questionDisplay').textContent = "Merci d'avoir répondu à toutes les questions!";
+            stopRecordingAndExport();
+        });
+    </script>
+</body>
+</html>
