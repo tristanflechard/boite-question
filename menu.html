@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu de Mariage - Margaux et Corentin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background-color: #fcf9f5;
+      color: #3b2c1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e1a948' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      z-index: -1;
+    }
+    
+    .menu-card {
+      max-width: 800px;
+      width: 100%;
+      background: #fff;
+      padding: 60px;
+      border: 1px solid #e8e1d6;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(to right, #c46a43, #e1a948);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .names {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: #c46a43;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .names::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(to right, #c46a43, #e1a948);
+    }
+    
+    .date-location {
+      font-size: 1.2rem;
+      color: #8c7b6b;
+      margin-top: 15px;
+      font-style: italic;
+    }
+    
+    .section {
+      margin: 25px 0;
+      position: relative;
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #c46a43;
+      margin-bottom: 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .section-title::before,
+    .section-title::after {
+      content: "•";
+      color: #e1a948;
+      margin: 0 15px;
+      font-size: 1.5rem;
+    }
+    
+    .menu-items {
+      list-style: none;
+    }
+    
+    .menu-item {
+      padding: 6px 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      position: relative;
+      text-align: center;
+    }
+    
+    .menu-item.highlight {
+      font-weight: 500;
+      color: #c46a43;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 25px 0;
+      color: #e1a948;
+      font-size: 0.7rem;
+      letter-spacing: 8px;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #8c7b6b;
+      font-size: 1.1rem;
+      font-style: italic;
+      position: relative;
+      padding-top: 20px;
+    }
+    
+    .footer::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #e1a948, transparent);
+    }
+    
+    .flourish {
+      position: absolute;
+      opacity: 0.03;
+      color: #c46a43;
+      font-size: 20rem;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .flourish-1 {
+      top: -60px;
+      right: -30px;
+      transform: rotate(15deg);
+    }
+    
+    .flourish-2 {
+      bottom: -80px;
+      left: -40px;
+      transform: rotate(-10deg);
+    }
+    
+    @media (max-width: 768px) {
+      .menu-card {
+        padding: 40px 25px;
+      }
+      
+      .names {
+        font-size: 2.2rem;
+      }
+      
+      .menu-item {
+        font-size: 1.1rem;
+      }
+      
+      .flourish {
+        font-size: 12rem;
+      }
+      
+      .flourish-1 {
+        top: -30px;
+        right: -20px;
+      }
+      
+      .flourish-2 {
+        bottom: -40px;
+        left: -20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="menu-card">
+    <div class="flourish flourish-1">M&C</div>
+    <div class="flourish flourish-2">M&C</div>
+    
+    <div class="header">
+      <h1 class="names">Margaux & Corentin</h1>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">Plat Principal</h2>
+      <ul class="menu-items">
+        <li class="menu-item highlight">Suprême de pintade farcie au foie gras et aux pommes</li>
+        <li class="menu-item">Réduction de cidre du Perche légèrement crémée et truffée</li>
+        <li class="menu-item">Pomme au calvados et jolie carotte</li>
+        <li class="menu-item">Purée de pommes de terre à l'ancienne</li>
+      </ul>
+    </div>
+    
+    <div class="divider">🌼 🌼 🌼</div>
+    
+    <div class="section">
+      <h2 class="section-title">Fromages</h2>
+      <ul class="menu-items">
+        <li class="menu-item highlight">Camembert au lait cru • Comté • Ste Maure de Touraine</li>
+        <li class="menu-item">Salade aux fruits secs et petit pain aux noix tiède</li>
+      </ul>
+    </div>
+    
+    <div class="divider">🌼 🌼 🌼 </div>
+    
+    <div class="section">
+      <h2 class="section-title">Dessert</h2>
+      <ul class="menu-items">
+        <li class="menu-item highlight">Saint-Honoré du Grand Père Maurice et salade de fraises</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
